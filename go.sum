@@ -1,3 +1,5 @@
+github.com/89trillion-zhenghai/parse-config v0.0.0-20210709130038-d9a42107dcc0 h1:ufSEmm9+bu+7HLye5njmVIM6yDafLYgU93vxNxfLwWQ=
+github.com/89trillion-zhenghai/parse-config v0.0.0-20210709130038-d9a42107dcc0/go.mod h1:GMAcoc0UphgEJB1qLO6DS/bjolWLcpuqr+4esoGGooE=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

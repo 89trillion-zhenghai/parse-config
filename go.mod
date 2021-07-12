@@ -3,6 +3,7 @@ module parse-config
 go 1.16
 
 require (
+	github.com/89trillion-zhenghai/parse-config v0.0.0-20210709130038-d9a42107dcc0 // indirect
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/gin-gonic/gin v1.7.2
 	github.com/smartystreets/goconvey v1.6.4 // indirect
