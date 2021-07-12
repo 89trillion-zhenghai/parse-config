@@ -14,11 +14,8 @@ import (
 
 var serverPort string
 
-// 定义命令行参数对应的变量
-var jsonPath = flag.StringP("jsonPath", "p", "", "")
-
 // ini配置文件路径
-var iniUrl = ""
+var iniUrl string
 
 //士兵信息json文件的路径
 var integralSoldierPath string
@@ -39,7 +36,8 @@ func wordSepNormalizeFunc(f *flag.FlagSet, name string) flag.NormalizedName {
 }
 
 func main() {
-
+	// 定义命令行参数对应的变量
+	jsonPath := flag.StringP("jsonPath", "p", "", "")
 	// 设置标准化参数名称的函数
 	flag.CommandLine.SetNormalizeFunc(wordSepNormalizeFunc)
 	// 把用户传递的命令行参数解析为对应变量的值

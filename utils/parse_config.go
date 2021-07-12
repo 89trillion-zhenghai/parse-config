@@ -27,7 +27,7 @@ func ReadJson(fn string) (string, map[string]model.Soldier) {
 	return newJson.Name(), sd
 }
 
-//ReadIni 读取app.ini配置文件，遍历所有分区，找到HttpPort,输出http端口号
+//ReadIni 读取app.ini配置文件，遍历所有分区，找到HttpPort,返回http端口号
 func ReadIni() string {
 	conf, err := ini.Load("./resource/app.ini")
 	getError("file not find or other error!", err)
@@ -38,7 +38,6 @@ func ReadIni() string {
 func getError(msg string, err error) {
 	if err != nil {
 		fmt.Println(msg)
-		panic(err)
 	}
 }
 
@@ -73,6 +72,7 @@ func ListenerForJson(sod *map[string]model.Soldier, fn string) {
 	select {}
 }
 
+//UpdateMapAndJson 更新配置文件和Soldiers
 func UpdateMapAndJson(sols *map[string]model.Soldier, fn string) {
 	sd := make(map[string]model.Soldier)
 	bytes, err := ioutil.ReadFile(fn)
