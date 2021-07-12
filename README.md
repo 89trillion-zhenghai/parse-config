@@ -88,5 +88,5 @@ func ListenerForJson(sod *map[string]model.Soldier, fn string) {...}
 //UpdateMapAndJson 更新配置文件和Soldiers
 func UpdateMapAndJson(sols *map[string]model.Soldier, fn string) {...}
 ```
-##流程图
+## 流程图
 ![未命名文件](https://user-images.githubusercontent.com/86946999/125233602-83326800-e311-11eb-9d89-da672fe2e4b5.jpg)
