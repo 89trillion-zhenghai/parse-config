@@ -2,7 +2,44 @@
 
 1、整理士兵配置文件格式且只保留有用的数据，利用gin开发服务响应用户请求并返回数据。
 
+## 目录结构
 
+```tree
+├── README.md
+├── __pycache__
+│   └── locust.cpython-39.pyc
+├── app
+│   ├── http
+│   │   └── httpServer.go
+│   ├── main
+│   └── main.go
+├── conf
+│   ├── app.ini
+│   ├── config.army.model.json
+│   └── soldier.json
+├── go.mod
+├── go.sum
+├── internal
+│   ├── ctrl
+│   │   └── soldierCtrl.go
+│   ├── globalError
+│   │   ├── error.go
+│   │   └── errorHandler.go
+│   ├── handler
+│   │   ├── soldierHandler.go
+│   │   └── soldierHandler_test.go
+│   ├── model
+│   │   └── Soldier.go
+│   ├── router
+│   │   └── routers.go
+│   └── verify
+│       └── verifyParam.go
+├── locust.py
+├── report.html
+└── util
+    ├── iniRead.go
+    └── jsonRead.go
+```
 
 ## 快速上手
 
@@ -14,79 +51,73 @@
 
 ​		2、 ./main -p=../conf/config.army.model.json ---通过命令行输入json路径并启动项目
 
-## 功能介绍
+## 逻辑分层
 
-1、读取app.ini配置文件，监听配置中的http端口号。
+| 层     | 文件夹                              | 主要职责           | 调用关系                  | 其它说明     |
+| ------ | ----------------------------------- | ------------------ | ------------------------- | ------------ |
+| 应用层 | /app/http/httpServer.go             | 服务器启动         | 调用路由层                | 不可同层调用 |
+| 路由层 | /internal/router/router.go          | 路由转发           | 被应用层调用，调用控制层  | 不可同层调用 |
+| 控制层 | /internal/ctrl/soldierCtrl.go       | 请求参数处理，响应 | 被路由层调用，调用handler | 不可同层调用 |
+| 处理层 | /internal/handler/soldierHandler.go | 处理具体业务       | 被控制层调用              | 不可同层调用 |
+| 工具层 | /utils                              | 对配置文件进行处理 | 被handler调用             | 不可同层调用 |
 
-2、读取命令行中保存士兵信息的json文件路径，对其格式化并取得有效数据。将其保存在新的json文件中。
+## 存储设计
 
-3、项目启动解析新的json文件，获取士兵信息保存在全局变量soldiers中。
-
-4、项目启动后，对以下请求进行相应并且返回需要的数据信息。
-
-​	1、输入稀有度、当前解锁阶段和cvc，获取该稀有度cvc合法且已解锁的所有士兵
-
-​	2、输入士兵id获取稀有度
-
-​	3、输入士兵id获取战力
-
-​	4、输入cvc获取所有合法的士兵
-
-​	5、获取每个阶段解锁相应士兵的json数据
-
-5、项目运行后，当原士兵配置文件改变后，会重新读取并更新新的json文件内容和存储士兵的全局变量soldiers。
-
-## 代码实现
-
-​	1、士兵信息类
+士兵结构体
 
 ```go
 type Soldier struct {
-   Id           string //编号
-   Rarity       string //稀有度
-   UnlockArena  string //解锁阶段
-   Cvc          string //客户端版本号
-   CombatPoints string //战斗力/战力点
+	Id           string `json:"id"`           //编号
+	Rarity       string `json:"Rarity"`       //稀有度
+	UnlockArena  string `json:"UnlockArena"`  //解锁阶段
+	Cvc          string `json:"Cvc"`          //客户端版本号
+	CombatPoints string `json:"CombatPoints"` //战斗力/战力点
 }
-func newSoldier(id string, ra string, un string, cvc string, cp string) Soldier {...}
 ```
 
-​	2、五个处理请求的方法
+## 接口设计
 
-```go
-// GetSoldiersByCvc 根据cvc获取所有合法的士兵
-func (*Soldier) GetSoldiersByCvc(cvc string, soldiers map[string]Soldier) map[string]Soldier {...}
+#### 请求方式：http.GET
 
-//GetCombatPointsById 根据士兵id获取战力
-func (*Soldier) GetCombatPointsById(id string, soldiers map[string]Soldier) string {...}
+| 请求地址                                  | 请求参数               | 响应结果     | 接口作用                                                     |
+| ----------------------------------------- | ---------------------- | ------------ | ------------------------------------------------------------ |
+| http://localhost:8000/GetSoldiersByCvc    | cvc                    | 士兵信息json | 根据cvc获取所有合法的士兵                                    |
+| http://localhost:8000/GetCombatPointsById | id                     | 战力         | 根据士兵id获取战力                                           |
+| http://localhost:8000/GetRarityById       | id                     | 稀有度       | 根据士兵id获取稀有度                                         |
+| http://localhost:8000/GetSoldiersByUn     | un                     | 士兵信息json | 根据解锁阶段分组返回士兵信息                                 |
+| http://localhost:8000/GetSoldiersByRUCv   | Rarity,UnlockArena,Cvc | 士兵信息json | 输入稀有度、当前解锁阶段、cvc。获取该稀有度、cvc合法且已经解锁的所有士兵 |
 
-//GetRarityById 根据士兵id获取稀有度
-func (*Soldier) GetRarityById(id string, soldiers map[string]Soldier) string {...}
+#### 响应状态码
 
-//GetSoldiersByUn 依据解锁阶段分组返回士兵信息
-func (*Soldier) GetSoldiersByUn(soldiers map[string]Soldier) map[string][]Soldier {...}
+| 状态码 | 说明       |
+| ------ | ---------- |
+| 无     | 成功       |
+| 1001   | 参数为空   |
+| 1002   | 参数不合法 |
+| 1003   | 服务器错误 |
+| 1004   | 士兵不存在 |
 
-//GetSoldiersByRUCv 输入稀有度、当前解锁阶段、cvc。获取该稀有度、cvc合法且已经解锁的所有士兵
-func (*Soldier) GetSoldiersByRUCv(ra string, un string, cv string, soldiers map[string]Soldier) map[string]Soldier {...}
+## 第三方库
+
+##### gopkg.in/ini.v1
+
+```
+https://github.com/go-ini/ini
+用于读取ini文件
 ```
 
-​	3、解析和更新配置文件
+##### pflag
 
-```go
-//ReadJson 读取json文件,提取有用的信息并且保存到configNew.army.model.json配置文件中
-func ReadJson(fn string) (string, map[string]model.Soldier) {...}
-
-//ReadIni 读取app.ini配置文件，遍历所有分区，找到HttpPort,返回http端口号
-func ReadIni() string {...}
-
-//错误处理
-func getError(msg string, err error) {...}
-
-//ListenerForJson 监听json文件，发生update操作则对Soldier和new.json更新
-func ListenerForJson(sod *map[string]model.Soldier, fn string) {...}
-
-//UpdateMapAndJson 更新配置文件和Soldiers
-func UpdateMapAndJson(sols *map[string]model.Soldier, fn string) {...}
 ```
+https://github.com/spf13/pflag
+第三方的命令行参数解析包
+```
+
+## todo
+
+将项目进一步划分，方便拓展
+
 ## 流程图
-![未命名文件](https://user-images.githubusercontent.com/86946999/125233602-83326800-e311-11eb-9d89-da672fe2e4b5.jpg)
+
+![](./流程题.jpg)
+
