@@ -12,7 +12,7 @@
 
 ​		1、go build main.go		---编译
 
-​		2、./main -p=./resource/config.army.model.json		---通过命令行输入json路径并启动项目
+​		2、 ./main -p=../conf/config.army.model.json ---通过命令行输入json路径并启动项目
 
 ## 功能介绍
 
